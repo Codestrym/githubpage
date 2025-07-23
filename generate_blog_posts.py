@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 import re # For sanitizing filenames
 import hashlib # For creating unique hashes of CSV rows
-import markdown # New: For converting Markdown to HTML
+import markdown # For converting Markdown to HTML
 
 # --- Configuration (Pulled from GitHub Actions Environment Variables) ---
 GITHUB_REPO_OWNER = os.environ.get("GITHUB_REPO_OWNER")
@@ -134,6 +134,7 @@ def generate_blog_post_html(title, content, image_url, affiliate_link, author="C
     if date is None:
         date = datetime.now().strftime("%B %d, %Y")
 
+    # Corrected base_public_path for GitHub Pages project sites
     base_public_path = f"https://{GITHUB_REPO_OWNER}.github.io/{GITHUB_REPO_NAME}"
 
     display_affiliate_link = affiliate_link if affiliate_link and affiliate_link.startswith('http') else '#'
@@ -255,7 +256,7 @@ def generate_blog_post_html(title, content, image_url, affiliate_link, author="C
     <!-- Footer Section - Consistent with your blog.html structure -->
     <footer class="bg-gray-800 text-white py-6 px-4 md:px-10 lg:px-16 mt-8">
         <div class="container mx-auto text-center text-sm">
-            <p>&copy; {datetime.now().year} My Affiliate Blog. All rights reserved.</p>
+            <p>&copy; {datetime.now().year} Codestrym. All rights reserved.</p> {/* Updated text here */}
             <p class="mt-2">
                 <a href="#" class="text-gray-400 hover:text-white transition duration-300">Privacy Policy</a> |
                 <a href="#" class="text-gray-400 hover:text-white transition duration-300">Terms of Service</a>
@@ -287,15 +288,15 @@ def update_blog_index(new_post_info):
             <!-- Automated Blog Post Card - {new_post_info['title']} -->
             <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                 <img src="{new_post_info['image_url']}" alt="{new_post_info['title']} image" class="w-full h-48 object-cover">
-                <div class="p-6">
+                <div class="p-6 flex flex-col"> {/* Added flex flex-col to make content area a flex container */}
                     <h2 class="text-xl font-semibold text-gray-800 mb-2">{new_post_info['title']}</h2>
-                    <p class="text-gray-600 text-sm mb-4">{new_post_info['summary']}</p>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">{new_post_info['summary']}</p> {/* Added flex-grow to push content down */}
                     <div class="flex items-center text-gray-500 text-xs mb-4">
                         <span class="mr-3">By : {new_post_info['author']}</span>
                         <span>{new_post_info['date']}</span>
                     </div>
                     
-                    <div class="flex justify-center space-x-4 mt-4"> <!-- Changed to flexbox for side-by-side buttons -->
+                    <div class="flex justify-center space-x-4 mt-4">
                         <a href="{new_post_info['affiliate_link']}" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300">
                             Shop Now!
                         </a>
@@ -374,7 +375,7 @@ def main():
         # 1. Generate Blog Post Text
         # Refined prompt to avoid "Summary:" prefix and encourage Markdown for structure
         text_prompt = f"Write a comprehensive and engaging blog post about '{keyword_for_ai}' based on the idea: '{post_text}'. The post should include an introduction, 2-3 main sections with clear Markdown headings (e.g., '## Section Title'), and a conclusion. Ensure the content flows naturally with paragraphs. The tone should be informative and slightly enthusiastic. Provide a concise summary (1-2 sentences) at the very beginning of the response, *without* explicitly labeling it 'Summary:'. Do not use emojis or excessive special characters like asterisks or hashtags within the main body of the text, only for Markdown formatting."
-        generated_text_with_summary = call_gemini_api(text_prompt)
+        generated_text_with_summary = call_gemini_api(prompt_text)
 
         if not generated_text_with_summary:
             print(f"Failed to generate blog post text for row {index}. Skipping.")
@@ -410,6 +411,7 @@ def main():
         os.makedirs(os.path.dirname(post_filename_relative), exist_ok=True)
         os.makedirs(os.path.dirname(image_filename_relative), exist_ok=True)
 
+        # Corrected base_public_path for GitHub Pages project sites
         base_public_path = f"https://{GITHUB_REPO_OWNER}.github.io/{GITHUB_REPO_NAME}"
         image_public_url = f"{base_public_path}/{image_filename_relative}"
         post_public_url = f"{base_public_path}/{post_filename_relative}"

@@ -94,7 +94,8 @@ def call_gemini_api(prompt_text):
         response = requests.post(f"{GEMINI_API_URL}?key={GOOGLE_API_KEY}", headers=headers, json=payload)
         response.raise_for_status()
         result = response.json()
-        if result.get("candidates") and result["candidates"][0].get("content") and result["candidates"][0]["content"].get("parts"]:
+        # Corrected line 97: Added missing closing parenthesis for .get("parts")
+        if result.get("candidates") and result["candidates"][0].get("content") and result["candidates"][0]["content"].get("parts"):
             return result["candidates"][0]["content"]["parts"][0]["text"]
         else:
             print(f"Gemini API response missing content: {result}")

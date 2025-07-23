@@ -21,6 +21,8 @@ jobs:
         # This token is automatically provided by GitHub Actions and has permissions
         # to commit back to the repository.
         token: ${{ secrets.GITHUB_TOKEN }}
+        # IMPORTANT FIX: Checkout to the root of the working directory
+        path: '.'
 
     - name: Set up Python
       uses: actions/setup-python@v5

@@ -267,7 +267,7 @@ def update_blog_index(new_post_info):
                         <span>{new_post_info['date']}</span>
                     </div>
                     
-                    <div class="my-4 text-center"> {/* Added margin and center alignment */}
+                    <div class="my-4 text-center"> <!-- Added margin and center alignment -->
                         <a href="{new_post_info['affiliate_link']}" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300">
                             Shop Now!
                         </a>

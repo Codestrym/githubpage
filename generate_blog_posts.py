@@ -295,7 +295,7 @@ def update_blog_index(new_post_info):
                         <span>{new_post_info['date']}</span>
                     </div>
                     
-                    <div class="flex justify-center space-x-4 mt-4"> {/* Changed to flexbox for side-by-side buttons */}
+                    <div class="flex justify-center space-x-4 mt-4"> <!-- Changed to flexbox for side-by-side buttons -->
                         <a href="{new_post_info['affiliate_link']}" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300">
                             Shop Now!
                         </a>

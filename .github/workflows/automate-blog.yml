@@ -1,0 +1,55 @@
+name: Automate Blog Posts from CSV
+
+on:
+  workflow_dispatch: # Allows manual triggering from the GitHub Actions tab
+  # schedule:
+    # This schedule is commented out for now.
+    # If you want it to run automatically, uncomment this and set a cron schedule.
+    # For example, to run daily at midnight UTC:
+    # - cron: '0 0 * * *'
+    # Or to run every 15 minutes (as previously discussed for time-based posts):
+    # - cron: '*/15 * * * *'
+
+jobs:
+  generate_and_publish_blog_posts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # This token is automatically provided by GitHub Actions and has permissions
+        # to commit back to the repository.
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9' # Or higher, e.g., '3.10', '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas
+
+    - name: Run blog generation script
+      run: python scripts/generate_blog_posts.py
+      env:
+        # Pass your AI API key as a GitHub Secret
+        # You should have already created this secret named GOOGLE_API_KEY
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        # Your GitHub username and repo name are needed by the script
+        GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+        GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+        GITHUB_BRANCH: ${{ github.ref_name }} # e.g., 'main' or 'gh-pages'
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add . # Add all new and modified files (new posts, images, updated blog.html, processed_posts.txt)
+        git commit -m "Automated: New blog posts generated from CSV" || echo "No changes to commit"
+        git push
+      env:
+        # Use the built-in GITHUB_TOKEN for pushing changes
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -21,7 +21,8 @@ jobs:
         # This token is automatically provided by GitHub Actions and has permissions
         # to commit back to the repository.
         token: ${{ secrets.GITHUB_TOKEN }}
-        # Removed 'path: .'. Let default behavior checkout to <repo_name>/
+        # IMPORTANT FIX: Explicitly checkout to the root of the working directory
+        path: '.'
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -34,8 +35,8 @@ jobs:
         pip install requests pandas
 
     - name: Run blog generation script
-      # IMPORTANT FIX: Set working-directory to the repository root
-      working-directory: ${{ github.workspace }}/${{ github.event.repository.name }}/
+      # IMPORTANT FIX: Set working-directory to the root of the checked-out repository
+      working-directory: ${{ github.workspace }}
       run: python generate_blog_posts.py # Script is now in the root, so no 'scripts/' prefix
       env:
         # Pass your AI API key as a GitHub Secret

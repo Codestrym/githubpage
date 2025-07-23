@@ -21,8 +21,7 @@ jobs:
         # This token is automatically provided by GitHub Actions and has permissions
         # to commit back to the repository.
         token: ${{ secrets.GITHUB_TOKEN }}
-        # Remove 'path: .', let default behavior place it in <repo_name>
-        # This simplifies the working-directory path below.
+        # Removed 'path: .'. Let default behavior checkout to <repo_name>/
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -35,9 +34,9 @@ jobs:
         pip install requests pandas
 
     - name: Run blog generation script
-      # IMPORTANT FIX: Explicitly set working-directory to the absolute path of your scripts folder
-      working-directory: ${{ github.workspace }}/${{ github.event.repository.name }}/scripts/
-      run: python generate_blog_posts.py
+      # IMPORTANT FIX: Set working-directory to the repository root
+      working-directory: ${{ github.workspace }}/${{ github.event.repository.name }}/
+      run: python generate_blog_posts.py # Script is now in the root, so no 'scripts/' prefix
       env:
         # Pass your AI API key as a GitHub Secret
         # You should have already created this secret named GOOGLE_API_KEY

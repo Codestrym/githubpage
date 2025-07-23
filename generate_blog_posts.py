@@ -94,7 +94,7 @@ def call_gemini_api(prompt_text):
         response = requests.post(f"{GEMINI_API_URL}?key={GOOGLE_API_KEY}", headers=headers, json=payload)
         response.raise_for_status()
         result = response.json()
-        if result.get("candidates") and result["candidates"][0].get("content") and result["candidates"][0]["content"].get("parts"):
+        if result.get("candidates") and result["candidates"][0].get("content") and result["candidates"][0]["content"].get("parts"]:
             return result["candidates"][0]["content"]["parts"][0]["text"]
         else:
             print(f"Gemini API response missing content: {result}")
@@ -288,9 +288,9 @@ def update_blog_index(new_post_info):
             <!-- Automated Blog Post Card - {new_post_info['title']} -->
             <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                 <img src="{new_post_info['image_url']}" alt="{new_post_info['title']} image" class="w-full h-48 object-cover">
-                <div class="p-6 flex flex-col"> {/* Added flex flex-col to make content area a flex container */}
+                <div class="p-6 flex flex-col"> <!-- Added flex flex-col to make content area a flex container -->
                     <h2 class="text-xl font-semibold text-gray-800 mb-2">{new_post_info['title']}</h2>
-                    <p class="text-gray-600 text-sm mb-4 flex-grow">{new_post_info['summary']}</p> {/* Added flex-grow to push content down */}
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">{new_post_info['summary']}</p> <!-- Added flex-grow to push content down -->
                     <div class="flex items-center text-gray-500 text-xs mb-4">
                         <span class="mr-3">By : {new_post_info['author']}</span>
                         <span>{new_post_info['date']}</span>

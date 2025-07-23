@@ -11,8 +11,11 @@ on:
 jobs:
   generate-posts:
     runs-on: ubuntu-latest
-    env: # <--- NEW: Define environment variables for this job
-      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }} # <--- NEW: Pass the secret as an environment variable
+    env: # Define environment variables for this job
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      GITHUB_REPO_OWNER: ${{ github.repository_owner }} # <--- NEW: Pass repository owner
+      GITHUB_REPO_NAME: ${{ github.event.repository.name }} # <--- NEW: Pass repository name
+      GITHUB_BRANCH: ${{ github.ref_name }} # <--- NEW: Pass current branch name
 
     steps:
     - name: Checkout repository

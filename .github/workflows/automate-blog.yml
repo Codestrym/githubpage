@@ -35,8 +35,9 @@ jobs:
         pip install requests pandas
 
     - name: Run blog generation script
-      # IMPORTANT FIX: Use GITHUB_WORKSPACE to ensure correct absolute path to the script
-      run: python ${{ github.workspace }}/scripts/generate_blog_posts.py
+      # IMPORTANT FIX: Set working-directory to 'scripts/' and refer to the script directly
+      working-directory: scripts/
+      run: python generate_blog_posts.py
       env:
         # Pass your AI API key as a GitHub Secret
         # You should have already created this secret named GOOGLE_API_KEY

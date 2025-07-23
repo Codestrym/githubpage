@@ -11,6 +11,8 @@ on:
 jobs:
   generate-posts:
     runs-on: ubuntu-latest
+    env: # <--- NEW: Define environment variables for this job
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }} # <--- NEW: Pass the secret as an environment variable
 
     steps:
     - name: Checkout repository
@@ -403,7 +405,7 @@ jobs:
                 
                 keyword_for_ai = image_category if image_category else post_text.split('.')[0].strip()
 
-                print(f"\\nProcessing new row {index}: Social Text='{post_text}', AI Keyword='{keyword_for_ai}'")
+                print(f"\nProcessing new row {index}: Social Text='{post_text}', AI Keyword='{keyword_for_ai}'")
 
                 # 1. Generate Blog Post Text
                 # Refined prompt to avoid "Summary:" prefix and encourage Markdown for structure
@@ -415,7 +417,7 @@ jobs:
                     continue
 
                 # Extract summary and full content
-                summary_end_index = generated_text_with_summary.find('\\n\\n')
+                summary_end_index = generated_text_with_summary.find('\n\n')
                 if summary_end_index != -1:
                     summary = generated_text_with_summary[:summary_end_index].strip()
                     full_content = generated_text_with_summary[summary_end_index:].strip()
@@ -493,13 +495,13 @@ jobs:
                 newly_processed_hashes.add(row_hash)
 
             if newly_processed_hashes:
-                print(f"\\nSaving {len(newly_processed_hashes)} newly processed post hashes to {PROCESSED_POSTS_FILE}...")
+                print(f"\nSaving {len(newly_processed_hashes)} newly processed post hashes to {PROCESSED_POSTS_FILE}...")
                 for h in newly_processed_hashes:
                     save_processed_post(h)
             else:
-                print("\\nNo new posts were processed in this run.")
+                print("\nNo new posts were processed in this run.")
 
-            print("\\nBlog post generation and local updates complete. The GitHub Actions 'Commit and push changes' step will now push these files to your repository.")
+            print("\nBlog post generation and local updates complete. The GitHub Actions 'Commit and push changes' step will now push these files to your repository.")
 
         if __name__ == "__main__":
             main()

@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 import re # For sanitizing filenames
 import hashlib # For creating unique hashes of CSV rows
-# pytz is no longer needed as time-based filtering is removed
+import markdown # New: For converting Markdown to HTML
 
 # --- Configuration (Pulled from GitHub Actions Environment Variables) ---
 GITHUB_REPO_OWNER = os.environ.get("GITHUB_REPO_OWNER")
@@ -38,6 +38,21 @@ def sanitize_filename(text):
     text = text.strip('-')
     # Limit length to avoid excessively long filenames, adjust as needed
     return text[:60]
+
+def remove_emojis(text):
+    """Removes emojis from a string."""
+    # This regex matches common emoji unicode ranges
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # emoticons
+        "\U0001F300-\U0001F5FF"  # symbols & pictographs
+        "\U0001F680-\U0001F6FF"  # transport & map symbols
+        "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+        "\U00002702-\U000027B0"
+        "\U000024C2-\U0001F251"
+        "]+", flags=re.UNICODE
+    )
+    return emoji_pattern.sub(r'', text)
 
 def get_row_hash(row):
     """
@@ -72,7 +87,7 @@ def call_gemini_api(prompt_text):
             "temperature": 0.7,
             "topP": 0.95,
             "topK": 40,
-            "maxOutputTokens": 1000,
+            "maxOutputTokens": 1500, # Increased max output tokens for longer articles
         }
     }
     try:
@@ -111,7 +126,7 @@ def call_imagen_api(prompt_text):
         print(f"Error calling Imagen API: {e}")
         return None
 
-def generate_blog_post_html(title, content, image_url, affiliate_link, author="AI Assistant", date=None):
+def generate_blog_post_html(title, content, image_url, affiliate_link, author="Codestrym Staff", date=None):
     """
     Generates the complete HTML content for a single blog post page,
     including a prominent affiliate link button.
@@ -122,6 +137,9 @@ def generate_blog_post_html(title, content, image_url, affiliate_link, author="A
     base_public_path = f"https://{GITHUB_REPO_OWNER}.github.io/{GITHUB_REPO_NAME}"
 
     display_affiliate_link = affiliate_link if affiliate_link and affiliate_link.startswith('http') else '#'
+
+    # Convert Markdown content to HTML
+    html_content = markdown.markdown(content)
 
     html_template = f"""
 <!DOCTYPE html>
@@ -188,7 +206,17 @@ def generate_blog_post_html(title, content, image_url, affiliate_link, author="A
     <!-- Header Section - Consistent with your blog.html structure -->
     <header class="bg-white shadow-md py-4 px-6 md:px-10 lg:px-16">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="{base_public_path}/" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition duration-300">My Affiliate Blog</a>
+            <h1 style="font-size: 20px;">
+                <span style="color: black;">C</span>
+                <span style="color: black;">o</span>
+                <span style="color: black;">d</span>
+                <span style="color: black;">e</span>
+                <span style="color: red;">S</span>
+                <span style="color: green;">t</span>
+                <span style="color: purple;">r</span>
+                <span style="color: orange;">y</span>
+                <span style="color: blue;">m</span>
+            </h1>
             <nav>
                 <ul class="flex space-x-4">
                     <li><a href="{base_public_path}/index.html" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300">Home</a></li>
@@ -205,11 +233,11 @@ def generate_blog_post_html(title, content, image_url, affiliate_link, author="A
         <article class="bg-white rounded-xl shadow-lg p-8">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">{title}</h1>
             <div class="text-gray-500 text-sm mb-6">
-                <span>By {author}</span> &bull; <span>{date}</span>
+                <span>By : {author}</span> &bull; <span>{date}</span>
             </div>
             <img src="{image_url}" alt="{title} image" class="w-full rounded-lg mb-8 object-cover max-h-96">
             <div class="blog-content text-gray-700 text-lg">
-                {content}
+                {html_content}
             </div>
             
             <div class="affiliate-button-container">
@@ -254,7 +282,7 @@ def update_blog_index(new_post_info):
         print(f"Error: {blog_index_path} not found. Please ensure it exists in the repository root.")
         return False
 
-    # --- IMPORTANT CHANGE HERE: Affiliate button added to the blog card snippet ---
+    # --- IMPORTANT CHANGES HERE: Author, and button layout ---
     new_card_html = f"""
             <!-- Automated Blog Post Card - {new_post_info['title']} -->
             <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
@@ -263,17 +291,16 @@ def update_blog_index(new_post_info):
                     <h2 class="text-xl font-semibold text-gray-800 mb-2">{new_post_info['title']}</h2>
                     <p class="text-gray-600 text-sm mb-4">{new_post_info['summary']}</p>
                     <div class="flex items-center text-gray-500 text-xs mb-4">
-                        <span class="mr-3">By {new_post_info['author']}</span>
+                        <span class="mr-3">By : {new_post_info['author']}</span>
                         <span>{new_post_info['date']}</span>
                     </div>
                     
-                    <div class="my-4 text-center"> <!-- Added margin and center alignment -->
+                    <div class="flex justify-center space-x-4 mt-4"> {/* Changed to flexbox for side-by-side buttons */}
                         <a href="{new_post_info['affiliate_link']}" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300">
                             Shop Now!
                         </a>
+                        <a href="{new_post_info['post_url']}" class="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">Read More</a>
                     </div>
-
-                    <a href="{new_post_info['post_url']}" class="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">Read More</a>
                 </div>
             </div>
             <!-- End Automated Blog Post Card -->
@@ -345,13 +372,15 @@ def main():
         print(f"\nProcessing new row {index}: Social Text='{post_text}', AI Keyword='{keyword_for_ai}'")
 
         # 1. Generate Blog Post Text
-        text_prompt = f"Expand on the topic of '{keyword_for_ai}' based on the idea: '{post_text}'. Write a comprehensive and engaging blog post. Include an introduction, 2-3 main sections with headings, and a conclusion. The tone should be informative and slightly enthusiastic. Also, provide a short summary (1-2 sentences) at the very beginning of the response."
+        # Refined prompt to avoid "Summary:" prefix and encourage Markdown for structure
+        text_prompt = f"Write a comprehensive and engaging blog post about '{keyword_for_ai}' based on the idea: '{post_text}'. The post should include an introduction, 2-3 main sections with clear Markdown headings (e.g., '## Section Title'), and a conclusion. Ensure the content flows naturally with paragraphs. The tone should be informative and slightly enthusiastic. Provide a concise summary (1-2 sentences) at the very beginning of the response, *without* explicitly labeling it 'Summary:'. Do not use emojis or excessive special characters like asterisks or hashtags within the main body of the text, only for Markdown formatting."
         generated_text_with_summary = call_gemini_api(text_prompt)
 
         if not generated_text_with_summary:
             print(f"Failed to generate blog post text for row {index}. Skipping.")
             continue
 
+        # Extract summary and full content
         summary_end_index = generated_text_with_summary.find('\n\n')
         if summary_end_index != -1:
             summary = generated_text_with_summary[:summary_end_index].strip()
@@ -359,6 +388,10 @@ def main():
         else:
             summary = generated_text_with_summary[:150].strip() + "..."
             full_content = generated_text_with_summary.strip()
+        
+        # Post-process: Remove emojis from full content
+        full_content = remove_emojis(full_content)
+        summary = remove_emojis(summary)
 
         # 2. Generate Image
         image_prompt = f"A vibrant and engaging image representing '{keyword_for_ai}'. Focus on concepts related to {keyword_for_ai}."
@@ -393,9 +426,10 @@ def main():
         # 5. Create the new blog post HTML file content
         blog_post_html_content = generate_blog_post_html(
             title=keyword_for_ai.replace('-', ' ').title(),
-            content=full_content,
+            content=full_content, # This content will now be Markdown and converted to HTML
             image_url=image_public_url,
             affiliate_link=affiliate_link, # Pass the affiliate link to the full post HTML
+            author="Codestrym Staff", # Explicitly set author for full post
             date=datetime.now().strftime("%B %d, %Y")
         )
 
@@ -415,7 +449,7 @@ def main():
             "image_url": image_public_url,
             "post_url": post_public_url,
             "affiliate_link": affiliate_link, # Pass the affiliate link to the index update
-            "author": "AI Assistant",
+            "author": "Codestrym Staff", # Explicitly set author for snippet
             "date": datetime.now().strftime("%B %d, %Y")
         }
         if not update_blog_index(new_post_info):

@@ -256,7 +256,7 @@ def generate_blog_post_html(title, content, image_url, affiliate_link, author="C
     <!-- Footer Section - Consistent with your blog.html structure -->
     <footer class="bg-gray-800 text-white py-6 px-4 md:px-10 lg:px-16 mt-8">
         <div class="container mx-auto text-center text-sm">
-            <p>&copy; {datetime.now().year} Codestrym. All rights reserved.</p> {/* Updated text here */}
+            <p>&copy; {datetime.now().year} Codestrym. All rights reserved.</p> <!-- Corrected text here -->
             <p class="mt-2">
                 <a href="#" class="text-gray-400 hover:text-white transition duration-300">Privacy Policy</a> |
                 <a href="#" class="text-gray-400 hover:text-white transition duration-300">Terms of Service</a>
